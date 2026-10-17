@@ -57,6 +57,14 @@ def process_scorecard_dict(d, players_dict, eid_to_cid):
 def harvest_from_directory(root_dir, players_dict, eid_to_cid):
     root = Path(root_dir)
     print(f"Scanning directory: {root}")
+    # 1. Process any tarballs in the directory
+    tar_files = sorted(list(root.rglob("*.tar*")))
+    if tar_files:
+        print(f"Found {len(tar_files)} archive files in {root}. Processing archives...")
+        for tar in tar_files:
+            harvest_from_tarball(str(tar), players_dict, eid_to_cid)
+
+    # 2. Process any loose scorecards
     count = 0
     for path in root.rglob("scorecard.json*"):
         try:
@@ -72,7 +80,8 @@ def harvest_from_directory(root_dir, players_dict, eid_to_cid):
                 print(f"Processed {count} scorecards... Unique players so far: {len(players_dict)}")
         except Exception as e:
             continue
-    print(f"Completed directory scan: {count} scorecards processed.")
+    if count > 0:
+        print(f"Completed directory scan: {count} loose scorecards processed.")
 
 def harvest_from_tarball(tar_path, players_dict, eid_to_cid):
     print(f"Scanning tarball: {tar_path}")

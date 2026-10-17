@@ -47,17 +47,21 @@ jobs:
           echo "Found $TOTAL_BATCHES raw batch archives."
           
           LIMIT="${{ github.event.inputs.batch_limit || '0' }}"
-          COUNT=0
-          
-          for ASSET in $ASSETS; do
-            if [ "$LIMIT" -gt 0 ] && [ "$COUNT" -ge "$LIMIT" ]; then
-              echo "Reached batch limit of $LIMIT. Stopping harvest."
-              break
-            fi
-            echo "Downloading $ASSET..."
-            gh release download data-unfiltered-batches --repo iam-Hemanth/cricket-lake-unfiltered --pattern "$ASSET" --dir data/raw_batches
-            COUNT=$((COUNT + 1))
-          done
+          if [ "$LIMIT" -eq 0 ]; then
+            echo "Downloading all 57 raw batch archives concurrently..."
+            gh release download data-unfiltered-batches --repo iam-Hemanth/cricket-lake-unfiltered --pattern "raw_batch_*.tar.gz" --dir data/raw_batches
+          else
+            COUNT=0
+            for ASSET in $ASSETS; do
+              if [ "$COUNT" -ge "$LIMIT" ]; then
+                echo "Reached batch limit of $LIMIT. Stopping harvest."
+                break
+              fi
+              echo "Downloading $ASSET..."
+              gh release download data-unfiltered-batches --repo iam-Hemanth/cricket-lake-unfiltered --pattern "$ASSET" --dir data/raw_batches
+              COUNT=$((COUNT + 1))
+            done
+          fi
           
           echo "Harvesting player targets from all downloaded batch archives..."
           python scripts/harvest_from_lake.py --dir data/raw_batches --output data/player_targets.json
