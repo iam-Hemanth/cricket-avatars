@@ -7,6 +7,14 @@ on:
         description: 'Number of raw batches to process (0 for all batches)'
         required: false
         default: '0'
+      quality:
+        description: 'WebP Quality 1-100 (default 95 for near-lossless high fidelity)'
+        required: false
+        default: '95'
+      target_size:
+        description: 'Target square resolution in pixels (default 600)'
+        required: false
+        default: '600'
   schedule:
     - cron: '0 3 * * 0' # Every Sunday at 03:00 UTC
 
@@ -69,10 +77,10 @@ jobs:
           # Clean up batch archives to save disk space
           rm -rf data/raw_batches
 
-      - name: Process & Convert Avatars to WebP
+      - name: Process & Convert Avatars to High-Quality WebP
         run: |
-          echo "Processing avatars (downloading & converting to 320x320 WebP)..."
-          python scripts/process_avatars.py --targets data/player_targets.json --manifest data/manifest.json --output-dir avatars --workers 12
+          echo "Processing avatars (downloading & converting to high-res WebP)..."
+          python scripts/process_avatars.py --targets data/player_targets.json --manifest data/manifest.json --output-dir avatars --workers 16 --target-size ${{ github.event.inputs.target_size || '600' }} --quality ${{ github.event.inputs.quality || '95' }}
 
       - name: Clean Temporary Target Files
         run: |

@@ -6,10 +6,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/407100/407193.5.png",
     "image_type": "portrait",
     "file": "1418371.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 3712,
-    "updated_at": "2026-10-17T17:22:04.285829+00:00"
+    "width": 160,
+    "height": 160,
+    "quality": 95,
+    "size_bytes": 6934,
+    "updated_at": "2026-10-17T17:39:58.786238+00:00"
   },
   "530011": {
     "espn_id": 530011,
@@ -18,10 +19,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/321500/321584.png",
     "image_type": "cutout",
     "file": "530011.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 7320,
-    "updated_at": "2026-10-17T17:22:04.658575+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 35202,
+    "updated_at": "2026-10-17T17:40:01.694761+00:00"
   },
   "722303": {
     "espn_id": 722303,
@@ -30,10 +32,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/357500/357502.png",
     "image_type": "cutout",
     "file": "722303.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 7990,
-    "updated_at": "2026-10-17T17:22:04.678653+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 43418,
+    "updated_at": "2026-10-17T17:40:01.630201+00:00"
   },
   "326434": {
     "espn_id": 326434,
@@ -42,10 +45,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/321500/321551.png",
     "image_type": "cutout",
     "file": "326434.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 8442,
-    "updated_at": "2026-10-17T17:22:04.723230+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 40112,
+    "updated_at": "2026-10-17T17:40:01.765777+00:00"
   },
   "1210488": {
     "espn_id": 1210488,
@@ -54,10 +58,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/347800/347820.png",
     "image_type": "cutout",
     "file": "1210488.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 8834,
-    "updated_at": "2026-10-17T17:22:04.882646+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 50128,
+    "updated_at": "2026-10-17T17:40:01.841657+00:00"
   },
   "662235": {
     "espn_id": 662235,
@@ -66,10 +71,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/324200/324232.png",
     "image_type": "cutout",
     "file": "662235.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 8406,
-    "updated_at": "2026-10-17T17:22:04.907087+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 43128,
+    "updated_at": "2026-10-17T17:39:59.832923+00:00"
   },
   "272450": {
     "espn_id": 272450,
@@ -78,10 +84,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/385700/385798.png",
     "image_type": "cutout",
     "file": "272450.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 7958,
-    "updated_at": "2026-10-17T17:22:04.986464+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 46174,
+    "updated_at": "2026-10-17T17:40:01.848397+00:00"
   },
   "826915": {
     "espn_id": 826915,
@@ -90,10 +97,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/329700/329711.png",
     "image_type": "cutout",
     "file": "826915.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 8420,
-    "updated_at": "2026-10-17T17:22:05.066496+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 41744,
+    "updated_at": "2026-10-17T17:40:00.226433+00:00"
   },
   "379504": {
     "espn_id": 379504,
@@ -102,10 +110,11 @@
     "source_url": "/lsci/db/PICTURES/CMS/321500/321549.png",
     "image_type": "cutout",
     "file": "379504.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 10358,
-    "updated_at": "2026-10-17T17:22:06.583610+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 49158,
+    "updated_at": "2026-10-17T17:40:02.335987+00:00"
   },
   "288284": {
     "espn_id": 288284,
@@ -114,9 +123,10 @@
     "source_url": "/lsci/db/PICTURES/CMS/316600/316622.png",
     "image_type": "cutout",
     "file": "288284.webp",
-    "width": 320,
-    "height": 320,
-    "size_bytes": 7892,
-    "updated_at": "2026-10-17T17:22:06.826069+00:00"
+    "width": 600,
+    "height": 600,
+    "quality": 95,
+    "size_bytes": 42656,
+    "updated_at": "2026-10-17T17:40:02.960543+00:00"
   }
 }

@@ -19,12 +19,12 @@ from PIL import Image
 
 CDN_PREFIX = "https://img1.hscicdn.com/image/upload/f_auto"
 FALLBACK_CDN_PREFIX = "https://p.imgci.com"
-TARGET_SIZE = 320
-QUALITY = 80
+DEFAULT_TARGET_SIZE = 600
+DEFAULT_QUALITY = 95
 
-def fetch_and_convert_image(espn_id, target_info, ctx):
+def fetch_and_convert_image(espn_id, target_info, ctx, target_size=DEFAULT_TARGET_SIZE, quality=DEFAULT_QUALITY):
     """
-    Downloads image for espn_id, converts to uniform 320x320 RGBA WebP.
+    Downloads image for espn_id, converts to high-quality RGBA WebP (default 600x600, quality 95).
     Returns: (espn_id, manifest_entry, bytes_data) or (espn_id, None, error_str)
     """
     headshot_url = target_info.get("headshot_url")
@@ -62,17 +62,21 @@ def fetch_and_convert_image(espn_id, target_info, ctx):
 
     try:
         img = Image.open(io.BytesIO(raw_bytes)).convert("RGBA")
-        # Resize maintaining aspect ratio
-        img.thumbnail((TARGET_SIZE, TARGET_SIZE), Image.Resampling.LANCZOS)
+        # Resize maintaining aspect ratio only if image is larger than target_size
+        if img.width > target_size or img.height > target_size:
+            img.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
 
-        # Pad into 320x320 square with transparent background
-        square = Image.new("RGBA", (TARGET_SIZE, TARGET_SIZE), (0, 0, 0, 0))
-        paste_x = (TARGET_SIZE - img.width) // 2
-        paste_y = (TARGET_SIZE - img.height) // 2
+        # Pad into square with transparent background
+        box_dim = max(img.width, img.height)
+        final_dim = target_size if box_dim >= int(target_size * 0.7) else box_dim
+
+        square = Image.new("RGBA", (final_dim, final_dim), (0, 0, 0, 0))
+        paste_x = (final_dim - img.width) // 2
+        paste_y = (final_dim - img.height) // 2
         square.paste(img, (paste_x, paste_y), img)
 
         out_buf = io.BytesIO()
-        square.save(out_buf, format="WEBP", quality=QUALITY, method=6)
+        square.save(out_buf, format="WEBP", quality=quality, method=6)
         webp_bytes = out_buf.getvalue()
 
         entry = {
@@ -82,8 +86,9 @@ def fetch_and_convert_image(espn_id, target_info, ctx):
             "source_url": source_path,
             "image_type": "cutout" if source_path == headshot_url else "portrait",
             "file": f"{espn_id}.webp",
-            "width": TARGET_SIZE,
-            "height": TARGET_SIZE,
+            "width": final_dim,
+            "height": final_dim,
+            "quality": quality,
             "size_bytes": len(webp_bytes),
             "updated_at": datetime.now(timezone.utc).isoformat()
         }
@@ -92,10 +97,12 @@ def fetch_and_convert_image(espn_id, target_info, ctx):
         return espn_id, None, f"Conversion error: {e}"
 
 def main():
-    parser = argparse.ArgumentParser(description="Process player avatars into uniform 320x320 WebPs.")
+    parser = argparse.ArgumentParser(description="Process player avatars into high-quality WebPs.")
     parser.add_argument("--targets", default="data/player_targets.json", help="Targets JSON path.")
     parser.add_argument("--manifest", default="data/manifest.json", help="Manifest JSON path.")
     parser.add_argument("--output-dir", default="avatars", help="Output directory for WebP avatars.")
+    parser.add_argument("--target-size", type=int, default=DEFAULT_TARGET_SIZE, help="Target square resolution (default 600).")
+    parser.add_argument("--quality", type=int, default=DEFAULT_QUALITY, help="WebP quality 1-100 (default 95).")
     parser.add_argument("--workers", type=int, default=8, help="Number of concurrent worker threads.")
     parser.add_argument("--limit", type=int, default=0, help="Optional limit for dry runs or tests.")
     args = parser.parse_args()
@@ -124,12 +131,14 @@ def main():
     queue = {}
     for eid_str, info in targets.items():
         curr = manifest.get(eid_str)
-        # Check if missing, file missing, or upgraded from portrait to cutout
+        # Check if missing, file missing, upgraded from portrait to cutout, or quality upgrade
         file_path = avatars_dir / f"{eid_str}.webp"
         needs_work = False
         if not curr or not file_path.exists():
             needs_work = True
         elif curr.get("image_type") == "portrait" and info.get("headshot_url") and curr.get("source_url") != info.get("headshot_url"):
+            needs_work = True
+        elif curr.get("quality", 0) < args.quality or curr.get("width", 0) < min(args.target_size, 600):
             needs_work = True
 
         if needs_work and (info.get("headshot_url") or info.get("image_url")):
@@ -150,7 +159,7 @@ def main():
     start_time = time.time()
 
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {executor.submit(fetch_and_convert_image, eid, info, ctx): eid for eid, info in queue.items()}
+        futures = {executor.submit(fetch_and_convert_image, eid, info, ctx, args.target_size, args.quality): eid for eid, info in queue.items()}
         for i, future in enumerate(as_completed(futures), 1):
             eid, entry, result = future.result()
             if entry is not None:

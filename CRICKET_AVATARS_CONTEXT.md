@@ -7,10 +7,10 @@
 
 ## 1. What This Repository Is
 
-An independent, standardized player avatar and headshot asset library for cricket analytics applications. Built directly from ESPNcricinfo's media catalog and delivery-level match participants, outputting uniform **320×320 transparent WebP images**.
+An independent, standardized player avatar and headshot asset library for cricket analytics applications. Built directly from ESPNcricinfo's media catalog and delivery-level match participants, outputting high-resolution **600×600 transparent WebP images** at **Quality 95**.
 
 - **Primary Identifier**: Keyed strictly by **`espn_id`** (e.g. `253802.webp` for Virat Kohli).
-- **Format**: 320×320 square WebP with transparent alpha channel (~8–15 KB per player).
+- **Format**: High-resolution square WebP with transparent alpha channel (native resolution up to 600×600, Quality 95, ~35–50 KB per player).
 - **Public CDN Distribution**: Served globally at zero cost via **jsDelivr**:
   ```
   https://cdn.jsdelivr.net/gh/iam-Hemanth/cricket-avatars@main/avatars/{espn_id}.webp
@@ -31,12 +31,16 @@ An independent, standardized player avatar and headshot asset library for cricke
 - Images are harvested from raw scorecard payloads:
   - **Tier 1 (Preferred)**: `headshotImageUrl` — crisp, transparent cut-out PNG from official team photoshoots.
   - **Tier 2 (Fallback)**: `imageUrl` — standard portrait photo.
-- Every image is centered, scaled with high-quality Lanczos resampling, and padded into a **320×320 square RGBA WebP** at quality 80.
-- Average file size is **~9.5 KB**, ensuring ultra-fast mobile and web rendering.
+- **High-Resolution Quality Contract**:
+  - Full native 600×600 resolution (no downscaling to 320px).
+  - High fidelity: **Quality 95** with maximum compression effort (`method=6`).
+  - Native scaling protection: Smaller images (e.g. 160×136) are preserved at native crispness rather than artificially upscaled.
+  - Razor-sharp on Apple Retina, high-DPI mobile, and 4K desktop screens.
+  - Average size: ~35–50 KB (complete 10,000-player library is ~450 MB, well within GitHub's 1–2 GB repo limits).
 
 ### C. Self-Healing Incremental Watermarking
-- `data/manifest.json` acts as an incremental watermark cache tracking `{espn_id, name, source_url, image_type, size_bytes, updated_at}`.
-- Re-runs detect new debutants or upgraded photos (transitioning from portrait to cutout) in seconds without re-downloading unchanged players.
+- `data/manifest.json` acts as an incremental watermark cache tracking `{espn_id, name, source_url, image_type, quality, width, height, size_bytes, updated_at}`.
+- Re-runs detect new debutants, upgraded photos (transitioning from portrait to cutout), or quality upgrades automatically without re-downloading unchanged players.
 
 ---
 
