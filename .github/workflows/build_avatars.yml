@@ -1,0 +1,108 @@
+name: Build & Sync Player Avatars
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_limit:
+        description: 'Number of raw batches to process (0 for all batches)'
+        required: false
+        default: '0'
+  schedule:
+    - cron: '0 3 * * 0' # Every Sunday at 03:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  build-avatars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download Raw Lake Batches & Harvest Targets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p data/raw_batches
+          echo "Fetching raw batches list from iam-Hemanth/cricket-lake-unfiltered..."
+          
+          # Fetch release asset download URLs
+          ASSETS=$(gh release view data-unfiltered-batches --repo iam-Hemanth/cricket-lake-unfiltered --json assets -q '.assets[] | select(.name | startswith("raw_batch_")) | .name')
+          
+          TOTAL_BATCHES=$(echo "$ASSETS" | wc -l)
+          echo "Found $TOTAL_BATCHES raw batch archives."
+          
+          LIMIT="${{ github.event.inputs.batch_limit || '0' }}"
+          COUNT=0
+          
+          for ASSET in $ASSETS; do
+            if [ "$LIMIT" -gt 0 ] && [ "$COUNT" -ge "$LIMIT" ]; then
+              echo "Reached batch limit of $LIMIT. Stopping harvest."
+              break
+            fi
+            echo "Downloading $ASSET..."
+            gh release download data-unfiltered-batches --repo iam-Hemanth/cricket-lake-unfiltered --pattern "$ASSET" --dir data/raw_batches
+            COUNT=$((COUNT + 1))
+          done
+          
+          echo "Harvesting player targets from all downloaded batch archives..."
+          python scripts/harvest_from_lake.py --dir data/raw_batches --output data/player_targets.json
+          
+          # Clean up batch archives to save disk space
+          rm -rf data/raw_batches
+
+      - name: Process & Convert Avatars to WebP
+        run: |
+          echo "Processing avatars (downloading & converting to 320x320 WebP)..."
+          python scripts/process_avatars.py --targets data/player_targets.json --manifest data/manifest.json --output-dir avatars --workers 12
+
+      - name: Clean Temporary Target Files
+        run: |
+          rm -f data/player_targets.json
+
+      - name: Commit & Push Updated Avatars
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add avatars/ data/manifest.json data/cricsheet_to_espn.json
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit. All avatars up to date."
+          else
+            git commit -m "chore: sync player avatars & manifest [skip ci]"
+            git push origin main
+          fi
+
+      - name: Package Master Avatar Tarball
+        run: |
+          echo "Packaging player_avatars_master.tar.gz..."
+          tar -czf player_avatars_master.tar.gz avatars/ data/manifest.json data/cricsheet_to_espn.json
+          ls -lh player_avatars_master.tar.gz
+
+      - name: Publish / Update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view avatars-master >/dev/null 2>&1; then
+            echo "Creating avatars-master release..."
+            gh release create avatars-master player_avatars_master.tar.gz \
+              --title "Player Avatars Master Distribution" \
+              --notes "Automated distribution package of standardized 320x320 WebP cricket player avatars."
+          else
+            echo "Uploading latest tarball to existing avatars-master release..."
+            gh release upload avatars-master player_avatars_master.tar.gz --clobber
+          fi

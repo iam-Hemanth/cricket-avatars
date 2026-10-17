@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Temporary data & processing caches
+temp/
+*.tmp
+*.log
+*.tar.gz
+data/raw_batches/
+data/player_targets.json
+
+# macOS
+.DS_Store
